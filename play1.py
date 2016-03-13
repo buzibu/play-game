@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 
 
 class PopCharacter:
@@ -13,14 +14,15 @@ class PopCharacter:
         self.professional_act = ''
         self.attitude = ''
         self.condition = ''
-        self.mood = ''
-        self.health = ''
-        self.star_quality = ''
+        self.mood = 200
+        self.health = 200
+        self.star_quality = 200
         self.cash = 111
         self.achievement_points = 0
         self.online_status = ''
 
-    def load_pass(self):
+    @staticmethod
+    def load_pass():
         """
         read user and pass from file
         """
@@ -55,9 +57,9 @@ class PopCharacter:
         self.professional_act = self.driver.find_element_by_xpath('//div[@class="float_left characterPresentation"]/p[2]/strong[2]').text
         self.attitude = self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl00_lnkAttitude').text
         self.condition = self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainToolbox"]/table/tbody/tr[2]/td[2]').text
-        self.mood = self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainValues"]/table/tbody/tr[1]/td[2]/div').get_attribute('title')
-        self.health = self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainValues"]/table/tbody/tr[2]/td[2]/div').get_attribute('title')
-        self.star_quality = self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainValues"]/table/tbody/tr[3]/td[2]/div').get_attribute('title')
+        self.mood = int(self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainValues"]/table/tbody/tr[1]/td[2]/div').get_attribute('title').strip('%'))
+        self.health = int(self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainValues"]/table/tbody/tr[2]/td[2]/div').get_attribute('title').strip('%'))
+        self.star_quality = int(self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainValues"]/table/tbody/tr[3]/td[2]/div').get_attribute('title').strip('%'))
         cash = self.driver.find_element_by_xpath('//*[@id="content"]/div[@class="charMainValues"]/table/tbody/tr[4]/td[2]').text.strip(' лв.')
         cash_b = ''
         for i in cash:
@@ -66,7 +68,12 @@ class PopCharacter:
             elif i == ',':
                 cash_b += '.'
         self.cash = float(cash_b)
-        print(self.curr_city, self.curr_locale, self.leisure_act, self.professional_act, self.attitude, self.condition, self.mood, self.health, self.star_quality, self.cash)
+        self.achievement_points = self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl00_lnkAchievementPoints').text
+        self.online_status = self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl00_lnkOnlineStatus').text
+        print(self.curr_city, self.curr_locale, self.leisure_act, self.professional_act)
+        print(self.attitude, self.condition)
+        print(self.mood, self.health, self.star_quality, self.cash)
+        print(self.online_status, self.achievement_points)
 
     def page_character(self):
         self.driver.find_element_by_id('ctl00_ctl05_ucMenu_lnkCharacter').click()
@@ -79,6 +86,59 @@ class PopCharacter:
 
     def page_locale(self):
         self.driver.find_element_by_id('ctl00_ctl05_ucMenu_lnkLocale').click()
+
+    def page_focus(self):
+        """
+        first have to be on character page
+        """
+        self.driver.find_element_by_xpath('//*[@id="mnuToolTipFocus"]/a').click()
+
+    def change_leisure_focus(self, leisure):
+        select = Select(self.driver.find_element_by_name('ctl00$cphLeftColumn$ctl00$ddlPriorities'))
+        select.select_by_value(str(leisure))
+        self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl00_btnSetPriority').click()
+        alert = self.driver.switch_to.alert
+        print(alert.text)
+        alert.accept()
+
+    def change_proffi_focus(self, proffi):
+        select = Select(self.driver.find_element_by_name('ctl00$cphLeftColumn$ctl01$ddlWorkTypes'))
+        select.select_by_value(str(proffi))
+        self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl01_btnSetWorkType').click()
+        alert = self.driver.switch_to.alert
+        print(alert.text)
+        alert.accept()
+
+'''
+"0">Приоритет за свободното време
+"17">Криене от останалите
+"13">Нелегално сваляне на музика
+"5">Обикаляне по кръчмите
+"9">Общуване с приятели
+"19">Посещение на психиатър
+"1">Почивка и разпускане
+"18">Разхождане
+"12">Свирене по улиците
+"6">Фитнес тренировки
+"4">Ходене по магазините
+
+"0">Приоритет за кариерата
+"13">Агитация на масите
+"9">Говорене с медиите
+"29">Зарязване на всичко
+"22">Обществен труд
+"3">Отдаване на работата
+"2">Писане на песни
+"8">Подобряване на умение
+"33">Посещаване на курс
+"15">Преподаване на умение
+"19">Репетиция на сцени
+"17">Събиране на цветя
+"14">Успокояване на масите
+"16">Учене от преподавател/ка
+
+'''
+
 
 if __name__ == '__main__':
     vera = PopCharacter()
@@ -93,3 +153,10 @@ if __name__ == '__main__':
     #vera.page_locale()
     #vera.driver.implicitly_wait(1)
     vera.read_user_status()
+    vera.page_focus()
+    if vera.health in range(90, 101):
+        vera.change_leisure_focus(6)
+    elif vera.health in range(60, 90):
+        vera.change_leisure_focus(18)
+    elif vera.health in range(0, 50):
+        vera.change_leisure_focus(1)
