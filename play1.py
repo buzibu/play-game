@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import os
 
 dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap["phantomjs.page.settings.userAgent"] = (
@@ -9,8 +10,8 @@ dcap["phantomjs.page.settings.userAgent"] = (
     "(KHTML, like Gecko) Chrome/15.0.87"
 )
 
-class PopCharacter:
 
+class PopCharacter:
     def __init__(self):
         self.current_page = ''
         #self.driver = webdriver.Firefox()
@@ -29,14 +30,7 @@ class PopCharacter:
         self.achievement_points = 0
         self.online_status = ''
 
-    @staticmethod
-    def load_pass():
-        """
-        read user and pass from file
-        """
-        with open('userinfo.txt','r') as f:
-            login = f.readlines()
-        return login
+
 
     def login(self):
         """
@@ -47,30 +41,40 @@ class PopCharacter:
         assert "Popmundo" in self.driver.title
         user_name = self.driver.find_element_by_id('ctl00_cphRightColumn_ucLogin_txtUsername')
         password = self.driver.find_element_by_id('ctl00_cphRightColumn_ucLogin_txtPassword')
-        user_cred = self.load_pass()
-        print(user_cred[0].strip())
-        print(user_cred[1].strip())
-        user_name.send_keys(user_cred[0].strip())
+        print('user: {}'.format(os.environ['PUSERNAME']))
+        print('pass: {}'.format(os.environ['PPASSWD']))
+        user_name.send_keys(os.environ['PUSERNAME'])
         # user_name.send_keys(Keys.RETURN)
-        password.send_keys(user_cred[1].strip())
+        password.send_keys(os.environ['PPASSWD'])
         vera.driver.get_screenshot_as_file(r'C:\Users\Vladi\Pictures\screenshots\tests\login.png')
-        #password.send_keys(Keys.RETURN)
+        # password.send_keys(Keys.RETURN)
         self.driver.find_element_by_id('ctl00_cphRightColumn_ucLogin_btnLogin').click()
-        #assert "No results found." not in self.driver.page_source
+        # assert "No results found." not in self.driver.page_source
         # driver.close()
 
-
     def read_user_status(self):
-        self.curr_city = self.driver.find_element_by_xpath('//div[@class="float_left characterPresentation"]/p[1]/a[contains(@href,"City")]').text
-        self.curr_locale = self.driver.find_element_by_xpath('//div[@class="float_left characterPresentation"]/p[1]/a[contains(@href,"Locale")]').text
-        self.leisure_act = self.driver.find_element_by_xpath('//div[@class="float_left characterPresentation"]/p[2]/strong[1]').text
-        self.professional_act = self.driver.find_element_by_xpath('//div[@class="float_left characterPresentation"]/p[2]/strong[2]').text
+        self.curr_city = self.driver.find_element_by_xpath(
+            '//div[@class="float_left characterPresentation"]/p[1]/a[contains(@href,"City")]').text
+        self.curr_locale = self.driver.find_element_by_xpath(
+            '//div[@class="float_left characterPresentation"]/p[1]/a[contains(@href,"Locale")]').text
+        self.leisure_act = self.driver.find_element_by_xpath(
+            '//div[@class="float_left characterPresentation"]/p[2]/strong[1]').text
+        self.professional_act = self.driver.find_element_by_xpath(
+            '//div[@class="float_left characterPresentation"]/p[2]/strong[2]').text
         self.attitude = self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl00_lnkAttitude').text
-        self.condition = self.driver.find_element_by_xpath('//*[@id="ppm-content"]/div[@class="charMainToolbox"]/table/tbody/tr[2]/td[2]').text
-        self.mood = int(self.driver.find_element_by_xpath('//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[1]/td[2]/div').get_attribute('title').strip('%'))
-        self.health = int(self.driver.find_element_by_xpath('//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[2]/td[2]/div').get_attribute('title').strip('%'))
-        self.star_quality = int(self.driver.find_element_by_xpath('//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[3]/td[2]/div').get_attribute('title').strip('%'))
-        cash = self.driver.find_element_by_xpath('//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[4]/td[2]').text.strip(' лв.')
+        self.condition = self.driver.find_element_by_xpath(
+            '//*[@id="ppm-content"]/div[@class="charMainToolbox"]/table/tbody/tr[2]/td[2]').text
+        self.mood = int(self.driver.find_element_by_xpath(
+            '//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[1]/td[2]/div').get_attribute(
+            'title').strip('%'))
+        self.health = int(self.driver.find_element_by_xpath(
+            '//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[2]/td[2]/div').get_attribute(
+            'title').strip('%'))
+        self.star_quality = int(self.driver.find_element_by_xpath(
+            '//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[3]/td[2]/div').get_attribute(
+            'title').strip('%'))
+        cash = self.driver.find_element_by_xpath(
+            '//*[@id="ppm-content"]/div[@class="charMainValues"]/table/tbody/tr[4]/td[2]').text.strip(' лв.')
         cash_b = ''
         for i in cash:
             if i.isdigit():
@@ -86,7 +90,7 @@ class PopCharacter:
         print(self.online_status, self.achievement_points)
 
     def select_character(self):
-        #self.driver.find_element_by_id('ctl00_cphLeftColumn_repCharacters_ctl00_btnChooseCharacter2').click()
+        # self.driver.find_element_by_id('ctl00_cphLeftColumn_repCharacters_ctl00_btnChooseCharacter2').click()
         self.driver.find_element_by_xpath('//input[@value="Избери Vera"]').click()
 
     def page_character(self):
@@ -111,17 +115,18 @@ class PopCharacter:
         select = Select(self.driver.find_element_by_name('ctl00$cphLeftColumn$ctl00$ddlPriorities'))
         select.select_by_value(str(leisure))
         self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl00_btnSetPriority').click()
-        #alert = self.driver.switch_to.alert
-        #print(alert.text)
-        #alert.accept()
+        # alert = self.driver.switch_to.alert
+        # print(alert.text)
+        # alert.accept()
 
     def change_proffi_focus(self, proffi):
         select = Select(self.driver.find_element_by_name('ctl00$cphLeftColumn$ctl01$ddlWorkTypes'))
         select.select_by_value(str(proffi))
         self.driver.find_element_by_id('ctl00_cphLeftColumn_ctl01_btnSetWorkType').click()
-        #alert = self.driver.switch_to.alert
-        #print(alert.text)
-       # alert.accept()
+        # alert = self.driver.switch_to.alert
+        # print(alert.text)
+        # alert.accept()
+
 
 '''
 "0">Приоритет за свободното време
@@ -153,34 +158,35 @@ class PopCharacter:
 
 '''
 
-
 if __name__ == '__main__':
     vera = PopCharacter()
 
     vera.login()
     vera.driver.implicitly_wait(3)
-    vera.driver.get_screenshot_as_file(r'C:\Users\Vladi\Pictures\screenshots\tests\select_character.png')
-    print(vera.driver.page_source)
+    vera.driver.get_screenshot_as_file(r'.\screenshots\select_character.png')
+    #print(vera.driver.page_source)
     vera.select_character()
-    vera.driver.get_screenshot_as_file(r'C:\Users\Vladi\Pictures\screenshots\tests\char_slected.png')
+    vera.driver.get_screenshot_as_file(r'.\screenshots\char_selected.png')
     vera.page_character()
     vera.driver.implicitly_wait(3)
-    #vera.page_start()
-    #vera.driver.implicitly_wait(1)
-    #vera.page_city()
-    #vera.driver.implicitly_wait(2)
-    #vera.page_locale()
-    #vera.driver.implicitly_wait(1)
+    # vera.page_start()
+    # vera.driver.implicitly_wait(1)
+    # vera.page_city()
+    # vera.driver.implicitly_wait(2)
+    # vera.page_locale()
+    # vera.driver.implicitly_wait(1)
     vera.read_user_status()
+    vera.driver.implicitly_wait(3)
     vera.page_focus()
+    vera.driver.implicitly_wait(3)
     if vera.health in range(90, 101):
-        vera.change_leisure_focus(6) # "6">Фитнес тренировки
+        vera.change_leisure_focus(6)  # "6">Фитнес тренировки
     elif vera.health in range(70, 90):
-        vera.change_leisure_focus(18) # "18">Разхождане
+        vera.change_leisure_focus(18)  # "18">Разхождане
     elif vera.health in range(0, 69):
-        vera.change_leisure_focus(1) # "1">Почивка и разпускане
+        vera.change_leisure_focus(1)  # "1">Почивка и разпускане
 
     if vera.mood in range(0, 20):
         vera.change_leisure_focus(19)  # "19">Посещение на психиатър
     elif vera.mood in range(20, 50):
-        vera.change_leisure_focus(4) # "4">Ходене по магазините
+        vera.change_leisure_focus(4)  # "4">Ходене по магазините
