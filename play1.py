@@ -7,7 +7,8 @@ class PopCharacter:
 
     def __init__(self):
         self.current_page = ''
-        self.driver = webdriver.Firefox()
+        #self.driver = webdriver.Firefox()
+        self.driver = webdriver.PhantomJS()
         self.curr_city = ''
         self.curr_locale = ''
         self.leisure_act = ''
