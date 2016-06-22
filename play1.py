@@ -59,7 +59,7 @@ class PopCharacter:
         #assert "No results found." not in self.driver.page_source
         # driver.close()
 
-       
+
     def read_user_status(self):
         self.curr_city = self.driver.find_element_by_xpath('//div[@class="float_left characterPresentation"]/p[1]/a[contains(@href,"City")]').text
         self.curr_locale = self.driver.find_element_by_xpath('//div[@class="float_left characterPresentation"]/p[1]/a[contains(@href,"Locale")]').text
